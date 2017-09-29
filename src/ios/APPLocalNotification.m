@@ -772,24 +772,26 @@
 - (void) fireEvent:(NSString*)event
       notification:(UNNotificationRequest*)notification
 {
-    NSString* js;
-    NSString* appState = [self applicationState];
-    NSString* params   = [NSString stringWithFormat:@"\"%@\"", appState];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString* js;
+        NSString* appState = [self applicationState];
+        NSString* params   = [NSString stringWithFormat:@"\"%@\"", appState];
 
-    if (notification) {
-        NSString* args = [notification encodeToJSON];
-        params = [NSString stringWithFormat:@"%@,'%@'", args, appState];
-    }
+        if (notification) {
+            NSString* args = [notification encodeToJSON];
+            params = [NSString stringWithFormat:@"%@,'%@'", args, appState];
+        }
 
-    js = [NSString stringWithFormat:
-          @"cordova.plugins.notification.local.core.fireEvent('%@', %@)",
-          event, params];
+        js = [NSString stringWithFormat:
+              @"cordova.plugins.notification.local.core.fireEvent('%@', %@)",
+              event, params];
 
-    if (deviceready) {
-        [self.commandDelegate evalJs:js];
-    } else {
-        [self.eventQueue addObject:js];
-    }
+        if (deviceready) {
+            [self.commandDelegate evalJs:js];
+        } else {
+            [self.eventQueue addObject:js];
+        }
+    });
 }
 
 #pragma mark -
